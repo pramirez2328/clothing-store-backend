@@ -14,7 +14,11 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173', // Update this if your frontend runs on a different port
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(passport.initialize()); // ✅ Required for Passport to work
 
 // MongoDB Connection
@@ -44,7 +48,7 @@ const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
 // Start Server
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log('🌐 http://localhost:5001');

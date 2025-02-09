@@ -7,53 +7,52 @@ const authenticateToken = require('../middleware/authenticateToken');
 
 const router = express.Router();
 
-// Render Register Page
-router.get('/register', (req, res) => {
-  res.render('register');
-});
-
-// Render Login Page
-router.get('/login', (req, res) => {
-  res.render('login');
-});
-
-// Handle Registration
+// Handle Registration (JSON Response)
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res.render('register', { error: 'All fields are required' });
+    return res.status(400).json({ error: 'All fields are required' });
   }
 
   try {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.render('register', { error: 'User already exists' });
+      return res.status(400).json({ error: 'User already exists' });
     }
 
-    // Create user (Password hashing is handled in User model)
-    const user = new User({ username, email, password });
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
     console.log('✅ User registered:', email);
-    res.redirect('/api/auth/login');
+
+    // ✅ Generate JWT Token on Registration
+    const secretKey = process.env.JWT_SECRET_KEY;
+    const token = jwt.sign({ id: user._id }, secretKey, { expiresIn: '4h' });
+
+    // ✅ Return the token in the response
+    res.status(201).json({ message: 'Registration successful!', token });
   } catch (err) {
-    console.error('🚨 Error during registration:', err);
-    res.render('register', { error: err.message });
+    console.error('🚨 Registration Error:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Handle Login with Passport
+// Handle Login with Passport (JSON Response)
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
       console.error('🚨 Authentication Error:', err);
-      return res.render('login', { error: 'Something went wrong. Try again.' });
+      return res.status(500).json({ error: 'Something went wrong. Try again.' });
     }
     if (!user) {
       console.log('❌ Invalid credentials:', req.body);
-      return res.render('login', { error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Generate JWT Token
@@ -61,22 +60,22 @@ router.post('/login', (req, res, next) => {
     const token = jwt.sign({ id: user._id }, secretKey, { expiresIn: '4h' });
 
     console.log('✅ User logged in:', user.email);
-    res.redirect(`/api/auth/profile?token=${token}`);
+    res.json({ token });
   })(req, res, next);
 });
 
-// Render Profile Page
+// Get User Profile (Protected Route)
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('-password');
     if (!user) {
-      return res.render('profile', { error: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.render('profile', { user: user.toObject() });
+    res.json(user);
   } catch (err) {
     console.error('🚨 Error fetching profile:', err);
-    res.render('profile', { error: 'Something went wrong.' });
+    res.status(500).json({ error: 'Something went wrong.' });
   }
 });
 
