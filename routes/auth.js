@@ -1,3 +1,5 @@
+// /routes/auth.js
+
 const bcrypt = require('bcryptjs');
 const express = require('express');
 const passport = require('passport');
@@ -16,26 +18,31 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // Hash the password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ✅ Prevent double hashing
+    if (password.startsWith('$2a$')) {
+      console.warn('🚨 WARNING: Password is already hashed. Skipping hashing.');
+      return res.status(400).json({ error: 'Invalid password format' });
+    }
 
-    // Create user
+    // ✅ Ensure password is properly hashed
+    console.log(`🔍 Raw Password Before Hashing: ${password}`);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(`🔑 Hashed Password for ${email}: ${hashedPassword}`);
+
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
-    console.log('✅ User registered:', email);
+    console.log('✅ User registered successfully:', user);
 
-    // ✅ Generate JWT Token on Registration
     const secretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ id: user._id }, secretKey, { expiresIn: '4h' });
 
-    // ✅ Return the token in the response
     res.status(201).json({ message: 'Registration successful!', token });
   } catch (err) {
     console.error('🚨 Registration Error:', err);
@@ -44,7 +51,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Handle Login with Passport (JSON Response)
-router.post('/login', (req, res, next) => {
+router.post('/login', async (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
       console.error('🚨 Authentication Error:', err);

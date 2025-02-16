@@ -1,3 +1,4 @@
+//app.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -14,12 +15,18 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ✅ Allow requests from your frontend's origin
 const corsOptions = {
-  origin: 'http://localhost:5173', // Update this if your frontend runs on a different port
-  credentials: true
+  origin: 'http://localhost:5173', // Your frontend's URL
+  methods: 'GET,POST,PUT,DELETE',
+  allowedHeaders: 'Content-Type,Authorization',
+  credentials: true // Allow cookies if needed
 };
-app.use(cors(corsOptions));
-app.use(passport.initialize()); // ✅ Required for Passport to work
+
+app.use(cors(corsOptions)); // ✅ Enable CORS
+
+app.use(passport.initialize()); // ✅ Required for Passport authentication
 
 // MongoDB Connection
 mongoose
@@ -27,7 +34,7 @@ mongoose
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('🚨 MongoDB connection error:', err));
 
-// Handlebars Configuration
+// Handlebars Configuration (for rendering pages)
 app.engine(
   'hbs',
   engine({
@@ -45,11 +52,14 @@ app.get('/', (req, res) => {
 });
 
 const authRoutes = require('./routes/auth');
+const purchaseRoutes = require('./routes/purchases'); // ✅ Import purchase routes
+
 app.use('/api/auth', authRoutes);
+app.use('/api/purchases', purchaseRoutes); // ✅ Add purchase routes
 
 // Start Server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log('🌐 http://localhost:5001');
+  console.log('🌐 http://localhost:5001'); // Corrected port output
 });
