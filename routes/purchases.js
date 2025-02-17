@@ -20,8 +20,6 @@ router.post('/create', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Purchase items must be a non-empty array' });
     }
 
-    console.log('✅ Purchase data:', items);
-
     // Calculate total price safely
     const totalAmount = items.reduce((sum, item) => sum + (item.price * item.orderQty || 0), 0);
 
@@ -40,13 +38,12 @@ router.post('/create', authenticateToken, async (req, res) => {
     });
 
     console.log('✅ Purchase data before saving:', newPurchase);
-
     await newPurchase.save();
 
     // ✅ Update the User with the purchase reference
     await User.findByIdAndUpdate(req.user.id, { $push: { purchases: newPurchase._id } });
 
-    res.status(201).json({ message: 'Purchase created successfully', purchaseId: newPurchase.purchaseId });
+    res.status(201).json({ message: 'Purchase created successfully', purchaseId: newPurchase._id });
   } catch (err) {
     console.error('🚨 Purchase Creation Error:', err);
     res.status(500).json({ error: 'Internal Server Error', details: err.message });

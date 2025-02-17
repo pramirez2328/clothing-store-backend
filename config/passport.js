@@ -16,12 +16,16 @@ passport.use(
       try {
         // Find the user by email
         const user = await User.findOne({ email });
+
         if (!user) {
           return done(null, false, { message: 'Invalid credentials' });
         }
 
         // Compare the password with the hashed password stored in the database
+        console.log('user.password', user.password);
+        console.log('first password', password);
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log('Password match:', isMatch);
         if (!isMatch) {
           return done(null, false, { message: 'Invalid credentials' });
         }

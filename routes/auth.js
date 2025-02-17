@@ -23,22 +23,30 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // ✅ Prevent double hashing
+    console.log(`🔍 Raw Password Before Hashing: ${password}`);
+
+    // ✅ Ensure password is NOT already hashed
     if (password.startsWith('$2a$')) {
       console.warn('🚨 WARNING: Password is already hashed. Skipping hashing.');
       return res.status(400).json({ error: 'Invalid password format' });
     }
 
-    // ✅ Ensure password is properly hashed
-    console.log(`🔍 Raw Password Before Hashing: ${password}`);
-
+    // ✅ Hash the password only once
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log(`🔑 Hashed Password for ${email}: ${hashedPassword}`);
 
+    // ✅ Save the exact hash
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
-    console.log('✅ User registered successfully:', user);
+    // ✅ Fetch user again to verify correct storage
+    const storedUser = await User.findOne({ email });
+    console.log(`✅ Stored Hash in DB: ${storedUser.password}`);
+
+    if (storedUser.password !== hashedPassword) {
+      console.error('🚨 ERROR: Hashed password was modified before saving!');
+      return res.status(500).json({ error: 'Password was altered after hashing.' });
+    }
 
     const secretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ id: user._id }, secretKey, { expiresIn: '4h' });
@@ -51,24 +59,43 @@ router.post('/register', async (req, res) => {
 });
 
 // Handle Login with Passport (JSON Response)
-router.post('/login', async (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) {
-      console.error('🚨 Authentication Error:', err);
-      return res.status(500).json({ error: 'Something went wrong. Try again.' });
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
     }
+
+    const user = await User.findOne({ email });
     if (!user) {
-      console.log('❌ Invalid credentials:', req.body);
+      console.log('❌ No user found:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate JWT Token
+    console.log(`🔍 Stored Hash for ${email}: ${user.password}`);
+    console.log(`🔍 Comparing entered password "${password}" with stored hash.`);
+
+    // ✅ Compare entered password with stored hash
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    console.log(`Password match: ${isMatch}`);
+
+    if (!isMatch) {
+      console.log('❌ Password mismatch for:', email);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // ✅ Generate JWT Token
     const secretKey = process.env.JWT_SECRET_KEY;
     const token = jwt.sign({ id: user._id }, secretKey, { expiresIn: '4h' });
 
-    console.log('✅ User logged in:', user.email);
+    console.log('✅ User logged in:', email);
     res.json({ token });
-  })(req, res, next);
+  } catch (err) {
+    console.error('🚨 Authentication Error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Get User Profile (Protected Route)
