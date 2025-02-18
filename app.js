@@ -1,4 +1,3 @@
-//app.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -6,6 +5,8 @@ const passport = require('passport');
 const cors = require('cors');
 const path = require('path');
 const { engine } = require('express-handlebars');
+const { createHandler } = require('graphql-http/lib/use/express');
+const schema = require('./graphql/schema'); // Import GraphQL schema
 
 // Load Passport config
 require('./config/passport');
@@ -25,7 +26,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions)); // ✅ Enable CORS
-
 app.use(passport.initialize()); // ✅ Required for Passport authentication
 
 // MongoDB Connection
@@ -46,6 +46,15 @@ app.engine(
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 
+// ✅ GraphQL Endpoint
+app.all(
+  '/graphql',
+  createHandler({
+    schema: schema,
+    graphiql: true // Enable GraphiQL UI for testing
+  })
+);
+
 // Routes
 app.get('/', (req, res) => {
   res.render('home', { title: 'Welcome to the Clothing Store' });
@@ -62,4 +71,5 @@ const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log('🌐 http://localhost:5001'); // Corrected port output
+  console.log('🚀 GraphQL running at http://localhost:5001/graphql');
 });
