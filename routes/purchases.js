@@ -50,15 +50,4 @@ router.post('/create', authenticateToken, async (req, res) => {
   }
 });
 
-// Get All Purchases for Logged-in User
-router.get('/my-purchases', authenticateToken, async (req, res) => {
-  try {
-    const userPurchases = await Purchase.find({ userId: req.user.id }).populate('userId', 'username email');
-    res.json(userPurchases);
-  } catch (err) {
-    console.error('🚨 Fetch Purchases Error:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 module.exports = router;

@@ -90,6 +90,13 @@ const RootQuery = new GraphQLObjectType({
       resolve(parent, args) {
         return Purchase.find({ userId: args.userId });
       }
+    },
+    purchase: {
+      type: PurchaseType,
+      args: { purchaseId: { type: GraphQLString } },
+      resolve(parent, args) {
+        return Purchase.findOne({ purchaseId: args.purchaseId });
+      }
     }
   }
 });
