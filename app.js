@@ -7,19 +7,36 @@ const path = require('path');
 const { engine } = require('express-handlebars');
 const { createHandler } = require('graphql-http/lib/use/express');
 const schema = require('./graphql/schema');
+const compression = require('compression'); // Add this line
+const helmet = require('helmet'); // Add this line
 
 // Load Passport config
 require('./config/passport');
 
 const app = express();
 
+// Use security and compression middleware
+app.use(helmet()); // Enable Helmet for security
+app.use(compression()); // Enable compression for performance
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Allow requests from your frontend's origin
+const allowedOrigins = [
+  'http://localhost:5173', // Development
+  'https://retailclothingstore.onrender.com/' // Production
+];
+
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   credentials: true
@@ -27,12 +44,22 @@ const corsOptions = {
 
 // Enable CORS with the specified options
 app.use(cors(corsOptions));
+
 // Required for Passport authentication
 app.use(passport.initialize());
 
+// MongoDB Connection String
+const MONGO_URI = process.env.MONGODB_URI.replace(
+  process.env.MONGODB_PASS,
+  encodeURIComponent(process.env.MONGODB_PASS) // Ensures special characters in the password don't break the connection
+);
+
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/clothing-store')
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('🚨 MongoDB connection error:', err));
 

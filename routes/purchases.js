@@ -23,7 +23,7 @@ router.post('/create', authenticateToken, async (req, res) => {
     // Calculate total price safely
     const totalAmount = items.reduce((sum, item) => sum + (item.price * item.orderQty || 0), 0);
 
-    // ✅ Create a new purchase
+    // Create a new purchase
     const newPurchase = new Purchase({
       userId: req.user.id, // Extract user ID from JWT
       items: items.map(({ id, title, price, orderQty, selectedSize, thumbnail }) => ({
@@ -39,7 +39,7 @@ router.post('/create', authenticateToken, async (req, res) => {
 
     await newPurchase.save();
 
-    // ✅ Update the User with the purchase reference
+    // Update the User with the purchase reference
     await User.findByIdAndUpdate(req.user.id, { $push: { purchases: newPurchase._id } });
 
     res.status(201).json({ message: 'Purchase created successfully', purchaseId: newPurchase._id });
