@@ -3,18 +3,18 @@ const jwt = require('jsonwebtoken');
 const authenticateToken = (req, res, next) => {
   let token = req.header('Authorization');
 
-  // ✅ Allow token to be passed via query string
+  // Allow token to be passed via query string
   if (!token) {
     token = req.query.token;
   }
 
-  // ✅ If token is in the Authorization header, extract it
+  // If token is in the Authorization header, extract it
   if (token && token.startsWith('Bearer ')) {
-    token = token.slice(7).trim(); // Remove "Bearer " prefix
+    token = token.slice(7).trim();
   }
 
   if (!token) {
-    console.warn('🚨 Unauthorized: No token provided');
+    console.log('🚨 Unauthorized: No token provided');
     return res.status(401).json({ error: 'Unauthorized: No token provided' });
   }
 
@@ -28,7 +28,7 @@ const authenticateToken = (req, res, next) => {
     const decoded = jwt.verify(token, secretKey); // Verify JWT
     req.user = decoded; // Attach decoded user info to request object
 
-    next(); // ✅ Proceed to next middleware/route
+    next(); // Proceed to next middleware/route
   } catch (err) {
     console.error('🚨 JWT Error:', err.message);
 

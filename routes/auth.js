@@ -23,23 +23,21 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    console.log(`🔍 Raw Password Before Hashing: ${password}`);
-
-    // ✅ Ensure password is NOT already hashed
+    // Ensure password is NOT already hashed
     if (password.startsWith('$2a$')) {
-      console.warn('🚨 WARNING: Password is already hashed. Skipping hashing.');
+      console.log('🚨 WARNING: Password is already hashed. Skipping hashing.');
       return res.status(400).json({ error: 'Invalid password format' });
     }
 
-    // ✅ Hash the password only once
+    // Hash the password only once
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log(`🔑 Hashed Password for ${email}: ${hashedPassword}`);
 
-    // ✅ Save the exact hash
+    // Save the exact hash
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
-    // ✅ Fetch user again to verify correct storage
+    // Fetch user again to verify correct storage
     const storedUser = await User.findOne({ email });
     console.log(`✅ Stored Hash in DB: ${storedUser.password}`);
 
@@ -73,12 +71,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    console.log(`🔍 Stored Hash for ${email}: ${user.password}`);
-    console.log(`🔍 Comparing entered password "${password}" with stored hash.`);
-
-    // ✅ Compare entered password with stored hash
+    // Compare entered password with stored hash
     const isMatch = await bcrypt.compare(password, user.password);
-
     console.log(`Password match: ${isMatch}`);
 
     if (!isMatch) {

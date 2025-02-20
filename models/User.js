@@ -8,14 +8,14 @@ const UserSchema = new mongoose.Schema({
   purchases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Purchase' }] // Reference to purchases
 });
 
-// ✅ Prevent Double Hashing Before Saving
+// Prevent Double Hashing Before Saving
 UserSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
-    // ✅ Check if the password is already hashed
+    // Check if the password is already hashed
     if (!this.password.startsWith('$2a$')) {
       this.password = await bcrypt.hash(this.password, 10);
     } else {
-      console.warn('🚨 WARNING: Password is already hashed. Skipping re-hashing.');
+      console.log('🚨 WARNING: Password is already hashed. Skipping re-hashing.');
     }
   }
   next();

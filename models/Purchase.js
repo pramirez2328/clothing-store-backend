@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid'); // For unique purchase IDs
 
+// Purchase Schema
 const PurchaseSchema = new mongoose.Schema({
-  purchaseId: { type: String, default: uuidv4, unique: true }, // Unique Purchase ID
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Relationship
+  purchaseId: { type: String, default: uuidv4, unique: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   items: [
     {
       productId: Number,

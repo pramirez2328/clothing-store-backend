@@ -6,7 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const { engine } = require('express-handlebars');
 const { createHandler } = require('graphql-http/lib/use/express');
-const schema = require('./graphql/schema'); // Import GraphQL schema
+const schema = require('./graphql/schema');
 
 // Load Passport config
 require('./config/passport');
@@ -17,16 +17,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Allow requests from your frontend's origin
+// Allow requests from your frontend's origin
 const corsOptions = {
-  origin: 'http://localhost:5173', // Your frontend's URL
+  origin: 'http://localhost:5173',
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
-  credentials: true // Allow cookies if needed
+  credentials: true
 };
 
-app.use(cors(corsOptions)); // ✅ Enable CORS
-app.use(passport.initialize()); // ✅ Required for Passport authentication
+// Enable CORS with the specified options
+app.use(cors(corsOptions));
+// Required for Passport authentication
+app.use(passport.initialize());
 
 // MongoDB Connection
 mongoose
@@ -34,7 +36,7 @@ mongoose
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('🚨 MongoDB connection error:', err));
 
-// Handlebars Configuration (for rendering pages)
+// Handlebars Configuration... this is for testing purposes only
 app.engine(
   'hbs',
   engine({
@@ -46,12 +48,12 @@ app.engine(
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 
-// ✅ GraphQL Endpoint
+// GraphQL Endpoint
 app.all(
   '/graphql',
   createHandler({
     schema: schema,
-    graphiql: true // Enable GraphiQL UI for testing
+    graphiql: true
   })
 );
 
@@ -61,15 +63,15 @@ app.get('/', (req, res) => {
 });
 
 const authRoutes = require('./routes/auth');
-const purchaseRoutes = require('./routes/purchases'); // ✅ Import purchase routes
+const purchaseRoutes = require('./routes/purchases');
 
 app.use('/api/auth', authRoutes);
-app.use('/api/purchases', purchaseRoutes); // ✅ Add purchase routes
+app.use('/api/purchases', purchaseRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log('🌐 http://localhost:5001'); // Corrected port output
+  console.log('🌐 http://localhost:5001');
   console.log('🚀 GraphQL running at http://localhost:5001/graphql');
 });

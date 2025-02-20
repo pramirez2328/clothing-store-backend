@@ -37,7 +37,6 @@ router.post('/create', authenticateToken, async (req, res) => {
       totalAmount
     });
 
-    console.log('✅ Purchase data before saving:', newPurchase);
     await newPurchase.save();
 
     // ✅ Update the User with the purchase reference
