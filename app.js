@@ -26,7 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 // Allow requests from your frontend's origin
 const allowedOrigins = [
   'http://localhost:5173', // Development
-  'https://retailclothingstore.onrender.com/' // Production
+  'http://localhost:5001', // Development
+  'https://retailclothingstore.onrender.com' // Production
 ];
 
 const corsOptions = {
@@ -34,11 +35,12 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`❌ CORS Blocked Request from: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization',
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
 
@@ -48,18 +50,9 @@ app.use(cors(corsOptions));
 // Required for Passport authentication
 app.use(passport.initialize());
 
-// MongoDB Connection String
-const MONGO_URI = process.env.MONGODB_URI.replace(
-  process.env.MONGODB_PASS,
-  encodeURIComponent(process.env.MONGODB_PASS) // Ensures special characters in the password don't break the connection
-);
-
 // MongoDB Connection
 mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('🚨 MongoDB connection error:', err));
 

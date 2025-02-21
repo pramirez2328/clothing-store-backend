@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: clothing-store-backend
+    runtime: node
+    plan: free
+    buildCommand: 'npm install'
+    startCommand: 'node app.js'
+    envVars:
+      - key: PORT
+        value: 5001
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
