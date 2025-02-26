@@ -1,5 +1,3 @@
-// cofig/passport.js
-
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
@@ -10,7 +8,7 @@ passport.use(
   new LocalStrategy(
     {
       usernameField: 'email',
-      passwordField: 'password'
+      passwordField: 'password',
     },
     async (email, password, done) => {
       try {
@@ -32,8 +30,8 @@ passport.use(
       } catch (err) {
         return done(err);
       }
-    }
-  )
+    },
+  ),
 );
 
 // Serialize user to store in session

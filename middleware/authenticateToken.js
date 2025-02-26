@@ -25,8 +25,8 @@ const authenticateToken = (req, res, next) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const decoded = jwt.verify(token, secretKey); // Verify JWT
-    req.user = decoded; // Attach decoded user info to request object
+    const decoded = jwt.verify(token, secretKey);
+    req.user = decoded;
 
     next(); // Proceed to next middleware/route
   } catch (err) {

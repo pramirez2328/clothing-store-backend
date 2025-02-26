@@ -1,5 +1,3 @@
-// /routes/auth.js
-
 const bcrypt = require('bcryptjs');
 const express = require('express');
 const passport = require('passport');

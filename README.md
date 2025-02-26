@@ -13,6 +13,7 @@ This is the backend service for the **Clothing Store** application, built using 
   - Helmet.js for HTTP security.
   - CORS configuration for frontend requests.
   - Compression middleware for optimized performance.
+  - Passport for security and authentication
 - **Templating**: Express Handlebars for view rendering (for testing purposes only).
 
 ## Installation
@@ -45,9 +46,9 @@ This is the backend service for the **Clothing Store** application, built using 
 
 ```
 clothing-store-backend/
-│── config/           # Configuration files (Passport, DB, etc.)
+│── config/           # Configuration files (Passport)
 │── graphql/          # GraphQL schema and resolvers
-│── middleware/       # Custom middleware (e.g., authentication)
+│── middleware/       # Custom middleware
 │── models/           # Mongoose models (User, Purchase)
 │── routes/           # Express routes
 │── views/            # Handlebars templates

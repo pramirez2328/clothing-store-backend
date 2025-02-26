@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  purchases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Purchase' }] // Reference to purchases
+  purchases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Purchase' }],
 });
 
 // Prevent Double Hashing Before Saving

@@ -1,4 +1,3 @@
-// routes/purchases.js
 const express = require('express');
 const authenticateToken = require('../middleware/authenticateToken');
 const Purchase = require('../models/Purchase');
@@ -32,9 +31,9 @@ router.post('/create', authenticateToken, async (req, res) => {
         price,
         orderQty,
         selectedSize,
-        thumbnail
+        thumbnail,
       })),
-      totalAmount
+      totalAmount,
     });
 
     await newPurchase.save();

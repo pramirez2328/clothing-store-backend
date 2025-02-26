@@ -7,8 +7,8 @@ const path = require('path');
 const { engine } = require('express-handlebars');
 const { createHandler } = require('graphql-http/lib/use/express');
 const schema = require('./graphql/schema');
-const compression = require('compression'); // Add this line
-const helmet = require('helmet'); // Add this line
+const compression = require('compression');
+const helmet = require('helmet');
 
 // Load Passport config
 require('./config/passport');
@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
   'http://localhost:5173', // Development
   'http://localhost:5001', // Development
-  'https://retailclothingstore.onrender.com' // Production
+  'https://retailclothingstore.onrender.com', // Production
 ];
 
 const corsOptions = {
@@ -41,7 +41,7 @@ const corsOptions = {
   },
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
 };
 
 // Enable CORS with the specified options
@@ -62,8 +62,8 @@ app.engine(
   engine({
     extname: '.hbs',
     defaultLayout: 'main',
-    layoutsDir: path.join(__dirname, 'views', 'layouts')
-  })
+    layoutsDir: path.join(__dirname, 'views', 'layouts'),
+  }),
 );
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
@@ -73,22 +73,22 @@ app.all(
   '/graphql',
   createHandler({
     schema: schema,
-    graphiql: true
-  })
+    graphiql: true,
+  }),
 );
 
-// Routes
+// this is for testing purposes only
 app.get('/', (req, res) => {
   res.render('home', { title: 'Welcome to the Clothing Store' });
 });
 
+// Routes
 const authRoutes = require('./routes/auth');
 const purchaseRoutes = require('./routes/purchases');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/purchases', purchaseRoutes);
 
-// Start Server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
