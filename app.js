@@ -30,6 +30,7 @@ const allowedOrigins = [
   'https://retailclothingstore.onrender.com', // Production
 ];
 
+// allow requests from all origins
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
