@@ -33,6 +33,7 @@ router.post('/register', async (req, res) => {
 
     // Save the exact hash
     const user = new User({ username, email, password: hashedPassword });
+    console.log('New User', user);
     await user.save();
 
     // Fetch user again to verify correct storage
